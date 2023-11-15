@@ -12,9 +12,9 @@ class GroupService {
    * @returns {Promise<GroupDocument>} A Promise that resolves to the created GroupDocument.
    */
   async createGroup(groupInput) {
-    const group = new GroupModel(groupInput);
-    await group.save();
-    return group;
+    const group = new GroupModel(groupInput)
+    await group.save()
+    return group
   }
 
   /**
@@ -24,18 +24,18 @@ class GroupService {
    * @returns {Promise<GroupDocument>} A Promise that resolves to the updated GroupDocument after adding users.
    * @throws {Error} Throws an error if the group or users are not found.
    */
-  async addUsersToGroup(groupId:string, userIds:string[]) {
-    const group = await GroupModel.findById(groupId);
+  async addUsersToGroup(groupId: string, userIds: string[]) {
+    const group = await GroupModel.findById(groupId)
     if (!group) {
-      throw new Error("Group not found");
+      throw new Error("Group not found")
     }
-    const users = await UserModel.find({ _id: { $in: userIds } });
+    const users = await UserModel.find({ _id: { $in: userIds } })
     if (users.length !== userIds.length) {
-      throw new Error("User not found");
+      throw new Error("User not found")
     }
-    group.users = group.users.concat(userIds);
-    await group.save();
-    return group;
+    group.users = group.users.concat(userIds)
+    await group.save()
+    return group
   }
 
   /**
@@ -43,7 +43,7 @@ class GroupService {
    * @returns {Promise<GroupDocument[]>} A Promise that resolves to an array of GroupDocuments representing all groups.
    */
   async findAll() {
-    return GroupModel.find();
+    return GroupModel.find()
   }
 
   /**
@@ -52,7 +52,7 @@ class GroupService {
    * @returns {Promise<GroupDocument | null>} A Promise that resolves to the found GroupDocument or null if not found.
    */
   async findById(id) {
-    return GroupModel.findById(id);
+    return GroupModel.findById(id)
   }
 
   /**
@@ -60,9 +60,18 @@ class GroupService {
    * @param {string} id - ID of the group to delete.
    * @returns {Promise<GroupDocument | null>} A Promise that resolves to the deleted GroupDocument or null if not found.
    */
-  async deleteById(id:string) {
-    return GroupModel.findByIdAndDelete(id);
+  async deleteById(id: string) {
+    return GroupModel.findByIdAndDelete(id)
   }
+
+  public async findByName(name: string): Promise<GroupDocument | null> {
+    try{
+        const group = await GroupModel.findOne({name: name});
+        return group;
+    }catch(error){
+        throw error;
+    }
+}
 
   /**
    * Adds a user to a group.
@@ -73,26 +82,26 @@ class GroupService {
    */
   async addMember(id: string, userInput: UserInput) {
     try {
-      const user = await UserModel.findOne({ name: userInput.name });
+      const user = await UserModel.findOne({ name: userInput.name })
       if (!user) {
-        throw new Error("User not found");
+        throw new Error("User not found")
       }
 
-      const groupToAdd = await GroupModel.findById(id);
+      const groupToAdd = await GroupModel.findById(id)
       if (!groupToAdd) {
-        throw new Error("Group not found");
+        throw new Error("Group not found")
       }
 
       if (groupToAdd.users.includes(user._id)) {
-        throw new Error("User already in group");
+        throw new Error("User already in group")
       }
 
-      groupToAdd.users.push(user._id);
-      user.groups?.push(groupToAdd._id);
-      await user.save();
-      await groupToAdd.save();
+      groupToAdd.users.push(user._id)
+      user.groups?.push(groupToAdd._id)
+      await user.save()
+      await groupToAdd.save()
     } catch (error) {
-      throw error;
+      throw error
     }
   }
 
@@ -105,29 +114,56 @@ class GroupService {
    */
   async removeMember(id: string, userId: string) {
     try {
-      const userToRemove = await UserModel.findById(userId);
+      const userToRemove = await UserModel.findById(userId)
       if (!userToRemove) {
-        throw new Error("User not found");
+        throw new Error("User not found")
       }
 
-      const group = await GroupModel.findById(id);
+      const group = await GroupModel.findById(id)
       if (!group) {
-        throw new Error("Group not found");
+        throw new Error("Group not found")
       }
 
       if (!group.users.includes(userToRemove._id)) {
-        throw new Error("User not in group");
+        throw new Error("User not in group")
       }
 
-      group.users = group.users.filter((user) => user !== userToRemove._id);
-      userToRemove.groups = userToRemove.groups?.filter((group) => group !== id);
-      await userToRemove.save();
-      await group.save();
+      group.users = group.users.filter((user) => user !== userToRemove._id)
+      userToRemove.groups = userToRemove.groups?.filter((group) => group !== id)
+      await userToRemove.save()
+      await group.save()
     } catch (error) {
-      throw error;
+      throw error
     }
   }
 
+  
+
+  public async update(
+    id: string,
+    groupInput: GroupInput
+  ): Promise<GroupDocument | null> {
+    try {
+      const groupUpdated = await GroupModel.updateOne({ _id: id }, groupInput)
+      if (groupUpdated) {
+        const group = await GroupModel.findById(id)
+        return group
+      }
+      return null
+    } catch (error) {
+      throw error
+    }
+  }
+
+  public async delete(id: string): Promise<GroupDocument | null> {
+    try {
+        const group = await GroupModel.findByIdAndDelete(id);
+        return group;
+    } catch (error) {
+        throw error;
+    }
+
+}
   /**
    * Retrieves groups associated with a user by username.
    * @param {string} userName - Username of the user to find associated groups.
@@ -136,16 +172,17 @@ class GroupService {
    */
   async getGroupsByUser(userName: string) {
     try {
-      const userExist = await UserModel.findOne({ name: userName });
+      const userExist = await UserModel.findOne({ name: userName })
       if (!userExist) {
-        throw new Error("User not found");
+        throw new Error("User not found")
       }
 
-      const groups = await GroupModel.find({ users: userExist._id });
-      return groups;
+      const groups = await GroupModel.find({ users: userExist._id })
+      return groups
     } catch (error) {
-      throw error;
+      throw error
     }
   }
 }
 
+export default new GroupService()
