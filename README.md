@@ -30,8 +30,10 @@ This guide walks you through the steps to configure and run an existing Node.js 
     Create a `.env` file in the project root and configure MongoDB connection string and JWT secret.
 
     ```env
-    MONGO_CONNECTION_STRING=mongodb://your-mongodb-uri
+    MONGO_URI=mongodb://your-mongodb-uri
     JWT_SECRET=your-secret-key
+    JWT_EXPIRE=24h (By default)
+    PORT=8000 (By default)
     ```
 
 2. **Configure TypeScript**:
