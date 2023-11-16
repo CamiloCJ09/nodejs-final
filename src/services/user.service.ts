@@ -11,7 +11,7 @@ class UserService {
    * @param {UserInput} userInput - Data for creating the user.
    * @returns {Promise<UserDocument>} A Promise that resolves to the created UserDocument.
    */
-  async createUser(userInput) {
+  async createUser(userInput: UserInput) {
     const user = new UserModel(userInput);
     await user.save();
     return user;

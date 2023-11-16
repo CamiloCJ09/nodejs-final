@@ -11,7 +11,7 @@ class GroupService {
    * @param {GroupInput} groupInput - Data for creating the group.
    * @returns {Promise<GroupDocument>} A Promise that resolves to the created GroupDocument.
    */
-  async createGroup(groupInput) {
+  async createGroup(groupInput: GroupInput) {
     const group = new GroupModel(groupInput)
     await group.save()
     return group
@@ -51,7 +51,7 @@ class GroupService {
    * @param {string} id - ID of the group to find.
    * @returns {Promise<GroupDocument | null>} A Promise that resolves to the found GroupDocument or null if not found.
    */
-  async findById(id) {
+  async findById(id: string) {
     return GroupModel.findById(id)
   }
 
@@ -65,13 +65,13 @@ class GroupService {
   }
 
   public async findByName(name: string): Promise<GroupDocument | null> {
-    try{
-        const group = await GroupModel.findOne({name: name});
-        return group;
-    }catch(error){
-        throw error;
+    try {
+      const group = await GroupModel.findOne({ name: name })
+      return group
+    } catch (error) {
+      throw error
     }
-}
+  }
 
   /**
    * Adds a user to a group.
@@ -128,16 +128,18 @@ class GroupService {
         throw new Error("User not in group")
       }
 
-      group.users = group.users.filter((user) => user !== userToRemove._id)
-      userToRemove.groups = userToRemove.groups?.filter((group) => group !== id)
-      await userToRemove.save()
-      await group.save()
+      await GroupModel.updateOne(
+        { _id: id },
+        { $pull: { users: userToRemove._id } }
+      )
+      await UserModel.updateOne(
+        { _id: userId },
+        { $pull: { groups: group._id } }
+      )
     } catch (error) {
       throw error
     }
   }
-
-  
 
   public async update(
     id: string,
@@ -157,13 +159,12 @@ class GroupService {
 
   public async delete(id: string): Promise<GroupDocument | null> {
     try {
-        const group = await GroupModel.findByIdAndDelete(id);
-        return group;
+      const group = await GroupModel.findByIdAndDelete(id)
+      return group
     } catch (error) {
-        throw error;
+      throw error
     }
-
-}
+  }
   /**
    * Retrieves groups associated with a user by username.
    * @param {string} userName - Username of the user to find associated groups.
