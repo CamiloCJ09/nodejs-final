@@ -16,7 +16,6 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (isTokenExpired(token)) {
-      console.log("token expired, refreshing.....")
       token = refreshToken(token)
     }
 
@@ -32,7 +31,6 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 const generateToken = (user: UserDocument) => {
-  console.log("generating  new token")
   try {
     const token = jwt.sign({ email: user.email, role: user.role }, secretKey, {
       expiresIn: process.env.JWT_EXPIRATION_TIME || "24h",
@@ -72,7 +70,6 @@ function isJwtPayload(decoded: any): decoded is jwt.JwtPayload {
 function isTokenExpired(token: string): boolean {
   try {
     const decoded = jwt.verify(token, secretKey) as { exp: number }
-    console.log("current expiration time ", decoded.exp)
     return decoded.exp < currentTimestamp
   } catch (error) {
     return true
